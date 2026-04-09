@@ -116,6 +116,38 @@ export default function Home() {
     });
   }
 
+  const studentAverages = students.map((student) => {
+    const sum = student.grades.reduce((acc, grade) => acc + grade, 0);
+    return sum / student.grades.length;
+  });
+
+  const classAverage =
+    studentAverages.length > 0
+      ? studentAverages.reduce((acc, average) => acc + average, 0) / studentAverages.length
+      : 0;
+
+  const subjectAverages =
+    students.length > 0
+      ? [0, 1, 2, 3, 4].map((subjectIndex) => {
+        const subjectSum = students.reduce(
+          (acc, student) => acc + student.grades[subjectIndex],
+          0
+        );
+        return subjectSum / students.length;
+      })
+      : [];
+
+  const studentsAboveClassAverage = students.filter((student) => {
+    const sum = student.grades.reduce((acc, grade) => acc + grade, 0);
+    const average = sum / student.grades.length;
+    return average > classAverage;
+  });
+
+  const studentsBelowAttendance = students.filter(
+    (student) => student.attendance < 75
+  );
+
+
   return (
     <Container sx={{ mt: 4, mb: 4 }}>
       <Box sx={{ mb: 4 }}>
@@ -258,9 +290,68 @@ export default function Home() {
           Resumo da turma
         </Typography>
 
-        <Typography variant="body1">
-          Resultados virão aqui.
-        </Typography>
+        {students.length === 0 ?
+          (<Typography>Nenhum dado disponivel ainda.</Typography>)
+          :
+          (
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+
+              <Paper sx={{ p: 2 }}>
+                <Typography variant="subtitle1" sx={{ mc: 1 }}>
+                  Média geral da turma
+                </Typography>
+                <Typography>{classAverage.toFixed(2)}</Typography>
+              </Paper>
+
+              <Paper sx={{ p: 2 }}>
+                <Typography variable="subtitle1" sx={{ mb: 1 }}>
+                  media da turma por disciplina
+                </Typography>
+
+                {subjectAverages.map((average, index) => (
+                  <Typography key={index}>
+                    Disciplina {index + 1}: {average.toFixed(2)}
+                  </Typography>
+                ))}
+              </Paper>
+
+              <Paper sx={{ p: 2 }}>
+                <Typography variable="subtitle1" sx={{ mb: 1 }}>
+                  Alunos acima da média da turma
+                </Typography>
+                {studentsAboveClassAverage.length === 0 ?
+                  (<Typography>Nenhum aluno acima da média da turma.</Typography>)
+                  :
+                  (
+                    studentsAboveClassAverage.map((student, index) => (
+                      <Typography key={index}>
+                        {student.name}
+                      </Typography>
+                    ))
+                  )}
+              </Paper>
+
+              <Paper sx={{ p: 2 }}>
+                <Typography variable="subtitle1" sx={{ mb: 1 }}>
+                  Alunos com frequência abaixo de 75%
+                </Typography>
+
+                {studentsBelowAttendance.length === 0 ?
+                  (<Typography>Nenhum aluno com frequência abaixo de 75%</Typography>)
+                  :
+                  (
+                    studentsBelowAttendance.map((student, index) =>
+                    (
+                      <Typography key={index}>
+                        {student.name} - {student.attendance}%
+                      </Typography>
+                    ))
+                  )}
+              </Paper>
+
+            </Box>
+          )
+        }
       </Paper>
     </Container>
   );
