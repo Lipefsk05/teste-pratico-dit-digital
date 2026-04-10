@@ -1,6 +1,6 @@
 # Sistema de Notas e Frequência
 
-## 📌 Descrição
+## Descrição
 
 Este projeto foi desenvolvido como solução para um teste técnico de estágio em desenvolvimento.
 
@@ -16,7 +16,7 @@ Os dados são persistidos em um backend utilizando Node.js e armazenados em um a
 
 ---
 
-## 🛠 Tecnologias utilizadas
+## Tecnologias utilizadas
 
 ### Front-end
 - Next.js
@@ -32,7 +32,7 @@ Os dados são persistidos em um backend utilizando Node.js e armazenados em um a
 
 ---
 
-## 🏗 Estrutura do projeto
+## Estrutura do projeto
 
 ```bash
 projeto/
