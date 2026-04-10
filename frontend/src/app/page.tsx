@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Container, Typography, Box } from "@mui/material";
 import StudentForm from "./components/StudentForm";
 import StudentTable from "./components/StudentTable";
@@ -24,6 +24,8 @@ export type FormErrors = {
 };
 
 export default function Home() {
+  const API_URL = "http://localhost:3001/students";
+
   const [name, setName] = useState("");
   const [grade1, setGrade1] = useState("");
   const [grade2, setGrade2] = useState("");
@@ -43,7 +45,21 @@ export default function Home() {
     attendance: "",
   });
 
-  function handleAddStudent() {
+  useEffect(() => {
+    async function fetchStudents() {
+      try {
+        const response = await fetch(API_URL);
+        const data = await response.json();
+        setStudents(data);
+      } catch (error) {
+        console.error("Erro ao buscar alunos:", error);
+      }
+    }
+
+    fetchStudents();
+  }, []);
+
+  async function handleAddStudent() {
     const newErrors: FormErrors = {
       name: "",
       grade1: "",
@@ -87,8 +103,7 @@ export default function Home() {
     const hasError = Object.values(newErrors).some((error) => error !== "");
     if (hasError) return;
 
-    const newStudent: Student = {
-      id: Date.now(),
+    const newStudent = {
       name: name.trim(),
       grades: [
         Number(grade1),
@@ -100,33 +115,77 @@ export default function Home() {
       attendance: Number(attendance),
     };
 
-    setStudents((prevStudents) => [...prevStudents, newStudent]);
+    try {
+      const response = await fetch(API_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(newStudent),
+      });
 
-    setName("");
-    setGrade1("");
-    setGrade2("");
-    setGrade3("");
-    setGrade4("");
-    setGrade5("");
-    setAttendance("");
+      if (!response.ok) {
+        throw new Error("Erro ao cadastrar aluno.");
+      }
 
-    setErrors({
-      name: "",
-      grade1: "",
-      grade2: "",
-      grade3: "",
-      grade4: "",
-      grade5: "",
-      attendance: "",
-    });
+      const createdStudent = await response.json();
+
+      setStudents((prevStudents) => [...prevStudents, createdStudent]);
+
+      setName("");
+      setGrade1("");
+      setGrade2("");
+      setGrade3("");
+      setGrade4("");
+      setGrade5("");
+      setAttendance("");
+
+      setErrors({
+        name: "",
+        grade1: "",
+        grade2: "",
+        grade3: "",
+        grade4: "",
+        grade5: "",
+        attendance: "",
+      });
+    } catch (error) {
+      console.error("Erro ao cadastrar aluno:", error);
+    }
   }
 
-  function handleRemoveStudent(id: number) {
-    setStudents((prevStudents) => prevStudents.filter((student) => student.id !== id));
+  async function handleRemoveStudent(id: number) {
+    try {
+      const response = await fetch(`${API_URL}/${id}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        throw new Error("Erro ao remover aluno.");
+      }
+
+      setStudents((prevStudents) =>
+        prevStudents.filter((student) => student.id !== id)
+      );
+    } catch (error) {
+      console.error("Erro ao remover aluno:", error);
+    }
   }
 
-  function handleClearStudents() {
-    setStudents([]);
+  async function handleClearStudents() {
+    try {
+      await Promise.all(
+        students.map((student) =>
+          fetch(`${API_URL}/${student.id}`, {
+            method: "DELETE",
+          })
+        )
+      );
+
+      setStudents([]);
+    } catch (error) {
+      console.error("Erro ao limpar lista:", error);
+    }
   }
 
   const isFormIncomplete =
